@@ -6,10 +6,10 @@ const int cMD = 64;
 
 int ExtractBit(uint64_t v, int p) { return ((v >> p) & 1); }
 
-std::vector<uint64_t> SortLSD(std::vector<uint64_t>& numbers, int n,
+std::vector<uint64_t> SortLSD(const std::vector<uint64_t>& numbers, int n,
                               int digit) {
   int count[2] = {0, 0};
-  for (uint64_t& v : numbers) {
+  for (const uint64_t& v : numbers) {
     ++count[ExtractBit(v, digit)];
   }
   count[1] += count[0];

@@ -7,7 +7,6 @@ const int cN2 = 45;
 const int cN3 = 10000000 + 4321;
 
 int GetMedian(std::vector<int>& a, int l, int r) {
-  std::sort(a.begin() + l, a.begin() + r);
   return a[l + ((r - l - 1) / 2)];
 }
 
@@ -73,4 +72,3 @@ int main() {
   }
   std::cout << a[QuickSelect(a, 0, n, k - 1)];
 }
-
