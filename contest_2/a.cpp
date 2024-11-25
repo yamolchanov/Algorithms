@@ -1,97 +1,111 @@
-#include <algorithm>
 #include <iostream>
+#include <stack>
+#include <string>
 #include <vector>
 
-const long long cMaxQ = 1e6 + 2;
-
-long long n = 0;
-std::vector<long long> tree(cMaxQ);
-std::vector<long long> position(cMaxQ);
-std::vector<long long> ind(cMaxQ);
-
-void Swap(long long v, long long u) {
-  std::swap(tree[v], tree[u]);
-  std::swap(position[ind[v]], position[ind[u]]);
-  std::swap(ind[v], ind[u]);
-}
-
-void SiftUp(long long v) {
-  if (v == 1) {
-    return;
+struct Deque {
+  std::stack<std::pair<int, int>> left;
+  std::stack<std::pair<int, int>> right;
+  void Push(int x) {
+    if (left.empty()) {
+      left.push({x, x});
+    } else {
+      int minimal = std::min(x, left.top().second);
+      left.push({x, minimal});
+    }
+    std::cout << "ok"
+              << "\n";
   }
-  if (tree[v / 2] > tree[v]) {
-    Swap(v / 2, v);
-    SiftUp(v / 2);
-  }
-}
 
-void SiftDown(long long v) {
-  if (v * 2 > n) {
-    return;
-  }
-  long long u = v * 2;
-  if (v * 2 + 1 <= n && tree[v * 2] > tree[v * 2 + 1]) {
-    u = v * 2 + 1;
-  }
-  if (tree[u] < tree[v]) {
-    Swap(u, v);
-    SiftDown(u);
-  }
-}
-
-long long GetMin() {
-  if (n == 0) {
-    return -1;
-  }
-  return tree[1];
-}
-
-void Insert(long long x, long long i) {
-  n++;
-  tree[n] = x;
-  position[i] = n;
-  ind[n] = i;
-  SiftUp(n);
-}
-
-void ExtractMin() {
-  if (n == 0) {
-    return;
-  }
-  Swap(1, n);
-  n--;
-  SiftDown(1);
-}
-
-void DecreaseKey(long long i, long long delta) {
-  long long pos = position[i];
-  tree[pos] -= delta;
-  SiftUp(pos);
-}
-
-int main() {
-  long long q;
-  std::cin >> q;
-
-  for (long long i = 1; i <= q; i++) {
-    std::string command;
-    std::cin >> command;
-
-    if (command == "insert") {
-      long long x;
-      std::cin >> x;
-      Insert(x, i);
-    } else if (command == "getMin") {
-      std::cout << GetMin() << "\n";
-    } else if (command == "extractMin") {
-      ExtractMin();
-    } else if (command == "decreaseKey") {
-      long long idx;
-      long long delta;
-      std::cin >> idx >> delta;
-      DecreaseKey(idx, delta);
+  void Dequeue() {
+    if (right.empty()) {
+      while (!left.empty()) {
+        int element = left.top().first;
+        left.pop();
+        int minimal =
+            right.empty() ? element : std::min(element, right.top().second);
+        right.push({element, minimal});
+      }
+    }
+    if (left.empty() && right.empty()) {
+      std::cout << "error"
+                << "\n";
+    } else {
+      int result = right.top().first;
+      right.pop();
+      std::cout << result << "\n";
     }
   }
 
-  return 0;
+  void Front() {
+    if (right.empty() && left.empty()) {
+      std::cout << "error"
+                << "\n";
+    } else if (right.empty()) {
+      while (!left.empty()) {
+        int element = left.top().first;
+        left.pop();
+        int minimal =
+            right.empty() ? element : std::min(element, right.top().second);
+        right.push({element, minimal});
+      }
+      std::cout << right.top().first << "\n";
+    } else {
+      std::cout << right.top().first << "\n";
+    }
+  }
+
+  void Clear() {
+    while (!left.empty()) {
+      left.pop();
+    }
+    while (!right.empty()) {
+      right.pop();
+    }
+    std::cout << "ok"
+              << "\n";
+  }
+
+  void Minimum() {
+    if (left.empty() && right.empty()) {
+      std::cout << "error"
+                << "\n";
+    } else if (left.empty()) {
+      std::cout << right.top().second << "\n";
+    } else if (right.empty()) {
+      std::cout << left.top().second << "\n";
+    } else {
+      std::cout << std::min(left.top().second, right.top().second) << "\n";
+    }
+  }
+
+  void Size() const {
+    auto size = left.size() + right.size();
+    std::cout << size;
+  }
+};
+
+int main() {
+  int n;
+  std::cin >> n;
+  std::string k;
+  Deque deck;
+  for (int i = 0; i < n; i++) {
+    std::cin >> k;
+    if (k == "enqueue") {
+      int x;
+      std::cin >> x;
+      deck.Push(x);
+    } else if (k == "dequeue") {
+      deck.Dequeue();
+    } else if (k == "front") {
+      deck.Front();
+    } else if (k == "size") {
+      deck.Size();
+    } else if (k == "clear") {
+      deck.Clear();
+    } else if (k == "min") {
+      deck.Minimum();
+    }
+  }
 }
