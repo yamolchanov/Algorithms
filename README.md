@@ -7,7 +7,7 @@
 
 Чтобы использовать репозиторий, сначала клонируйте его:  
 ```bash
-git clone https://github.com/username/repository-name.git  
+git clone https://github.com/yamolchanov/Algorithms-MIPT  
 cd repository-name
 ```
 Затем скомпилируйте и запустите нужное решение:
