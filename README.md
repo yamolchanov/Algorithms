@@ -8,7 +8,7 @@
 Чтобы использовать репозиторий, сначала клонируйте его:  
 ```bash
 git clone https://github.com/yamolchanov/Algorithms-MIPT  
-cd repository-name
+cd Algorithms-MIPT
 ```
 Затем скомпилируйте и запустите нужное решение:
 ```bash
