@@ -8,12 +8,12 @@
 Чтобы использовать репозиторий, сначала клонируйте его:  
 ```bash
 git clone https://github.com/username/repository-name.git  
-cd repository-name
+cd repository-name```
 
 Затем скомпилируйте и запустите нужное решение:
 ```bash
 g++ contest_1/task_A.cpp -o task_A  
-./task_A  
+./task_A```  
 
 Цель репозитория — разбор решений, улучшение качества кода, подготовка к олимпиадам и собеседованиям.
 Используемые инструменты: C++17, компилятор g++, CMake, среда разработки CLion.
