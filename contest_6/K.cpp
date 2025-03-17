@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-void Logic(int n, std::vector<int>& indexs, int& length, std::vector<int>& last,
+void DP1(int n, std::vector<int>& indexs, int& length, std::vector<int>& last,
            std::vector<int>& a) {
   for (int i = 0; i < n; i++) {
     int low = 1;
@@ -23,7 +23,7 @@ void Logic(int n, std::vector<int>& indexs, int& length, std::vector<int>& last,
   std::cout << length << "\n";
 }
 
-void Table(int length, std::vector<int>& result, int k,
+void DP2(int length, std::vector<int>& result, int k,
            std::vector<int>& last) {
   for (int i = length - 1; i >= 0; --i) {
     result[i] = k + 1;
@@ -44,8 +44,8 @@ int main() {
   for (int i = 0; i != n; ++i) {
     std::cin >> a[i];
   }
-  Logic(n, indexs, length, last, a);
+  DP1(n, indexs, length, last, a);
   std::vector<int> result(length);
-  Table(length, result, indexs[length], last);
+  DP2(length, result, indexs[length], last);
 }
 
