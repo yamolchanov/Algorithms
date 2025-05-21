@@ -4,7 +4,6 @@
 #include <vector>
 
 const int cInf = 10000001;
-const int cMaxn = 105;
 
 struct Edge {
   int to;
@@ -16,124 +15,136 @@ struct Edge {
       : to(t), capacity(cap), flow(f), reverse(rev_idx), index(orig_idx) {}
 };
 
-std::vector<Edge> graph[cMaxn];
-int parent_vertex[cMaxn];
-int parent_edge_index[cMaxn];
-bool visited[cMaxn];
-
-void AddEdge(int u, int v, int capacity, int index) {
-  graph[u].emplace_back(v, capacity, 0, (int)graph[v].size(), index);
-  graph[v].emplace_back(u, capacity, 0, (int)graph[u].size(), index);
-  graph[u].back().reverse = graph[v].size() - 1;
-  graph[v].back().reverse = graph[u].size() - 1;
-}
-
-bool BFS(int s, int t, int n) {
-  for (int i = 0; i <= n; ++i) {
-    visited[i] = false;
-    parent_vertex[i] = -1;
-    parent_edge_index[i] = -1;
+class Graph {
+ public:
+  Graph(int n) : n_(n) {
+    graph_.resize(n_ + 1);
+    visited_.resize(n_ + 1);
+    parent_vertex_.resize(n_ + 1);
+    parent_edge_index_.resize(n_ + 1);
   }
-  std::queue<int> q;
-  q.push(s);
-  visited[s] = true;
-  while (!q.empty()) {
-    int u = q.front();
-    q.pop();
-    if (u == t) {
-      return true;
-    }
-    for (size_t i = 0; i < graph[u].size(); ++i) {
-      Edge& e = graph[u][i];
-      int v = e.to;
 
-      if (!visited[v] && e.capacity - e.flow > 0) {
-        visited[v] = true;
-        parent_vertex[v] = u;
-        parent_edge_index[v] = i;
-        q.push(v);
+  void AddEdge(int u, int v, int capacity, int index) {
+    graph_[u].emplace_back(v, capacity, 0, (int)graph_[v].size(), index);
+    graph_[v].emplace_back(u, capacity, 0, (int)graph_[u].size() - 1, index);
+  }
+
+  long long MaxFlow(int s, int t) {
+    long long total_flow = 0;
+    while (BFS(s, t)) {
+      int path_flow = cInf;
+      for (int v = t; v != s; v = parent_vertex_[v]) {
+        int u = parent_vertex_[v];
+        int edge_idx = parent_edge_index_[v];
+        path_flow = std::min(
+            path_flow, graph_[u][edge_idx].capacity - graph_[u][edge_idx].flow);
+      }
+      for (int v = t; v != s; v = parent_vertex_[v]) {
+        int u = parent_vertex_[v];
+        int edge_idx = parent_edge_index_[v];
+        graph_[u][edge_idx].flow += path_flow;
+        int rev = graph_[u][edge_idx].reverse;
+        graph_[v][rev].flow -= path_flow;
+      }
+      total_flow += path_flow;
+    }
+    return total_flow;
+  }
+
+  void FindReachableFromSource(int s) {
+    std::fill(visited_.begin(), visited_.end(), false);
+    std::queue<int> q;
+    q.push(s);
+    visited_[s] = true;
+    while (!q.empty()) {
+      int u = q.front();
+      q.pop();
+      for (const auto& edge : graph_[u]) {
+        if (!visited_[edge.to] && edge.capacity - edge.flow > 0) {
+          visited_[edge.to] = true;
+          q.push(edge.to);
+        }
       }
     }
   }
-  return false;
-}
 
-long long MaxFlow(int s, int t, int n) {
-  long long total_flow = 0;
-  while (BFS(s, t, n)) {
-    int path_flow = cInf;
-    for (int v = t; v != s; v = parent_vertex[v]) {
-      int u = parent_vertex[v];
-      int edge_idx = parent_edge_index[v];
-      path_flow = std::min(
-          path_flow, graph[u][edge_idx].capacity - graph[u][edge_idx].flow);
-    }
-    for (int v = t; v != s; v = parent_vertex[v]) {
-      int u = parent_vertex[v];
-      int edge_idx = parent_edge_index[v];
-      graph[u][edge_idx].flow += path_flow;
-      int reverse_edge_idx = graph[u][edge_idx].reverse;
-      graph[v][reverse_edge_idx].flow -= path_flow;
-    }
-    total_flow += path_flow;
-  }
-  return total_flow;
-}
-
-void Find(int s, int n) {
-  for (int i = 0; i <= n; ++i) {
-    visited[i] = false;
-  }
-  std::queue<int> q;
-  q.push(s);
-  visited[s] = true;
-  while (!q.empty()) {
-    int u = q.front();
-    q.pop();
-    for (const auto& edge : graph[u]) {
-      if (!visited[edge.to] && edge.capacity - edge.flow > 0) {
-        visited[edge.to] = true;
-        q.push(edge.to);
+  std::vector<int> GetMinCutEdges() const {
+    std::vector<int> cut_edges;
+    for (int u = 1; u <= n_; ++u) {
+      if (visited_[u]) {
+        for (const auto& edge : graph_[u]) {
+          if (!visited_[edge.to]) {
+            cut_edges.push_back(edge.index);
+          }
+        }
       }
     }
+    std::sort(cut_edges.begin(), cut_edges.end());
+    return cut_edges;
   }
-}
 
-int main() {
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
+ private:
+  int n_;
+  std::vector<std::vector<Edge>> graph_;
+  std::vector<bool> visited_;
+  std::vector<int> parent_vertex_;
+  std::vector<int> parent_edge_index_;
+
+  bool BFS(int s, int t) {
+    std::fill(visited_.begin(), visited_.end(), false);
+    std::fill(parent_vertex_.begin(), parent_vertex_.end(), -1);
+    std::fill(parent_edge_index_.begin(), parent_edge_index_.end(), -1);
+    std::queue<int> q;
+    q.push(s);
+    visited_[s] = true;
+    while (!q.empty()) {
+      int u = q.front();
+      q.pop();
+      for (size_t i = 0; i < graph_[u].size(); ++i) {
+        const auto& e = graph_[u][i];
+        if (!visited_[e.to] && e.capacity - e.flow > 0) {
+          visited_[e.to] = true;
+          parent_vertex_[e.to] = u;
+          parent_edge_index_[e.to] = i;
+          q.push(e.to);
+        }
+      }
+    }
+    return visited_[t];
+  }
+};
+
+void Solve() {
   int n;
   int m;
   std::cin >> n >> m;
+  Graph g(n);
   for (int i = 0; i < m; ++i) {
     int u;
     int v;
     int c;
     std::cin >> u >> v >> c;
-    AddEdge(u, v, c, i + 1);
+    g.AddEdge(u, v, c, i + 1);
   }
+
   int source = 1;
   int sink = n;
-  long long min_cut_capacity = MaxFlow(source, sink, n);
-  Find(source, n);
-  std::vector<int> cut_edge_indices;
-  for (int u = 1; u <= n; ++u) {
-    if (visited[u]) {
-      for (const auto& edge : graph[u]) {
-        if (!visited[edge.to]) {
-          cut_edge_indices.push_back(edge.index);
-        }
-      }
-    }
-  }
-  std::sort(cut_edge_indices.begin(), cut_edge_indices.end());
+  long long min_cut_capacity = g.MaxFlow(source, sink);
+  g.FindReachableFromSource(source);
+  std::vector<int> cut_edges = g.GetMinCutEdges();
 
-  std::cout << cut_edge_indices.size() << " " << min_cut_capacity << "\n";
-  for (size_t i = 0; i < cut_edge_indices.size(); ++i) {
+  std::cout << cut_edges.size() << " " << min_cut_capacity << "\n";
+  for (size_t i = 0; i < cut_edges.size(); ++i) {
     if (i > 0) {
       std::cout << " ";
     }
-    std::cout << cut_edge_indices[i];
+    std::cout << cut_edges[i];
   }
   std::cout << "\n";
+}
+
+int main() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  Solve();
 }
