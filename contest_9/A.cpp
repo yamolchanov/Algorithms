@@ -1,14 +1,21 @@
 #include <iostream>
 #include <vector>
 
-bool TryKuhn(int v, std::vector<std::vector<int>>& g, std::vector<bool>& used,
+struct Graph {
+  int n;
+  int k;
+  std::vector<std::vector<int>> adj;
+  Graph(int n, int k) : n(n), k(k), adj(n) {}
+  void AddEdge(int u, int v) { adj[u].push_back(v); }
+};
+
+bool TryKuhn(int v, const Graph& g, std::vector<bool>& used,
              std::vector<int>& mt) {
   if (used[v]) {
     return false;
   }
   used[v] = true;
-  for (size_t i = 0; i < g[v].size(); ++i) {
-    int to = g[v][i];
+  for (int to : g.adj[v]) {
     if (mt[to] == -1 || TryKuhn(mt[to], g, used, mt)) {
       mt[to] = v;
       return true;
@@ -17,35 +24,29 @@ bool TryKuhn(int v, std::vector<std::vector<int>>& g, std::vector<bool>& used,
   return false;
 }
 
-int main() {
+void Solve() {
   int n;
   int k;
-  std::vector<std::vector<int>> graph;
-  std::vector<int> mt;
-  std::vector<bool> used;
   std::cin >> n >> k;
-  mt.assign(k, -1);
-  graph.resize(n);
-
-  for (int i = 0; i < n; i++) {
+  int count = 0;
+  Graph g(n, k);
+  std::vector<int> mt(k, -1);
+  std::vector<bool> used(n);
+  for (int i = 0; i < n; ++i) {
     int j;
     std::cin >> j;
     while (j != 0) {
-      j--;
-      graph[i].push_back(j);
+      g.AddEdge(i, j - 1);
       std::cin >> j;
     }
   }
-
   for (int v = 0; v < n; ++v) {
     used.assign(n, false);
-    TryKuhn(v, graph, used, mt);
+    TryKuhn(v, g, used, mt);
   }
-  int count = 0;
-
   for (int i = 0; i < k; ++i) {
     if (mt[i] != -1) {
-      count++;
+      ++count;
     }
   }
   std::cout << count << "\n";
@@ -55,3 +56,5 @@ int main() {
     }
   }
 }
+
+int main() { Solve(); }
