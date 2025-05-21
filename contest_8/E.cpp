@@ -1,39 +1,39 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+
+const int cInf = 100000000;
+const int cJoke = 100000;
+
 struct Edge {
   int u;
   int v;
   int w;
 };
 
-int main() {
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  int n;
-  std::vector<Edge> edges;
-  const int cInf = 100000000;
-  const int cJoke = 100000;
-  std::cin >> n;
+class Graph {
+public:
+  Graph(int n) : n_(n) {}
+  void AddEdge(int u, int v, int w) { edges_.push_back({u, v, w}); }
+  const std::vector<Edge>& GetEdges() const { return edges_; }
+  int Size() const { return n_; }
 
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      int w;
-      std::cin >> w;
-      if (w != cJoke) {
-        edges.push_back({i, j, w});
-      }
-    }
-  }
+private:
+  int n_;
+  std::vector<Edge> edges_;
+};
 
+void Solve(const Graph& g) {
+  int n = g.Size();
   std::vector<int> dist(n, cInf);
   std::vector<int> p(n, -1);
   dist[0] = 0;
   int x = -1;
 
+  const std::vector<Edge>& edges = g.GetEdges();
   for (int i = 0; i < n; ++i) {
     x = -1;
-    for (auto& edge : edges) {
+    for (const auto& edge : edges) {
       int u = edge.u;
       int v = edge.v;
       int w = edge.w;
@@ -76,3 +76,23 @@ int main() {
   }
 }
 
+int main() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  int n;
+  std::cin >> n;
+
+  Graph g(n);
+
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      int w;
+      std::cin >> w;
+      if (w != cJoke) {
+        g.AddEdge(i, j, w);
+      }
+    }
+  }
+
+  Solve(g);
+}
