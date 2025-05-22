@@ -6,68 +6,67 @@ const long long cNot = 2009000999;
 
 class Graph {
 public:
-  Graph(int n) : n_(n), g_(n) {}
+  Graph(int vertexc) : vertex_count_(vertexc), adj_(vertexc) {}
 
-  void AddEdge(int x, int y, int w) {
-    g_[x].emplace_back(y, w);
-    g_[y].emplace_back(x, w);
+  void AddEdge(int from, int to, int weight) {
+    adj_[from].emplace_back(to, weight);
+    adj_[to].emplace_back(from, weight);
   }
 
-  std::vector<int> Dijkstra(int s) {
-    std::vector<int> d(n_, cNot);
-    std::set<std::pair<int, int>> q;
-    d[s] = 0;
-    for (int i = 0; i < n_; ++i) {
-      q.insert({d[i], i});
+  std::vector<int> Dijkstra(int source) {
+    std::vector<int> distance(vertex_count_, cNot);
+    std::set<std::pair<int, int>> quue;
+    distance[source] = 0;
+    for (int i = 0; i < vertex_count_; ++i) {
+      quue.insert({distance[i], i});
     }
-    while (!q.empty()) {
-      int v = q.begin()->second;
-      q.erase(q.begin());
 
-      for (auto& [to, len] : g_[v]) {
-        if (len != -1 && d[v] + len < d[to]) {
-          q.erase({d[to], to});
-          d[to] = d[v] + len;
-          q.insert({d[to], to});
+    while (!quue.empty()) {
+      int current = quue.begin()->second;
+      quue.erase(quue.begin());
+
+      for (auto& [neighbor, weight] : adj_[current]) {
+        if (weight != -1 && distance[current] + weight < distance[neighbor]) {
+          quue.erase({distance[neighbor], neighbor});
+          distance[neighbor] = distance[current] + weight;
+          quue.insert({distance[neighbor], neighbor});
         }
       }
     }
-    return d;
+    return distance;
   }
 
 private:
-  int n_;
-  std::vector<std::vector<std::pair<int, int>>> g_;
+  int vertex_count_;
+  std::vector<std::vector<std::pair<int, int>>> adj_;
 };
-
-void Solve() {
-  int t;
-  std::cin >> t;
-  while (t > 0) {
-    int n;
-    int m;
-    int s;
-    std::cin >> n >> m;
-    Graph graph(n);
-    for (int i = 0; i < m; ++i) {
-      int x;
-      int y;
-      int w;
-      std::cin >> x >> y >> w;
-      graph.AddEdge(x, y, w);
-    }
-    std::cin >> s;
-    std::vector<int> distances = graph.Dijkstra(s);
-    for (int dist : distances) {
-      std::cout << dist << " ";
-    }
-    std::cout << "\n";
-    t--;
-  }
-}
 
 int main() {
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  Solve();
+
+  int test;
+  std::cin >> test;
+
+  while (test > 0) {
+    int vertex;
+    int edge;
+    std::cin >> vertex >> edge;
+    Graph graph(vertex);
+    for (int i = 0; i < edge; ++i) {
+      int from;
+      int to;
+      int weight;
+      std::cin >> from >> to >> weight;
+      graph.AddEdge(from, to, weight);
+    }
+    int cvertex;
+    std::cin >> cvertex;
+    std::vector<int> distances = graph.Dijkstra(cvertex);
+    for (int distance : distances) {
+      std::cout << distance << " ";
+    }
+    std::cout << "\n";
+    test--;
+  }
 }

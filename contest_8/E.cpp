@@ -23,15 +23,36 @@ private:
   std::vector<Edge> edges_;
 };
 
-void Solve(const Graph& g) {
-  int n = g.Size();
-  std::vector<int> dist(n, cInf);
-  std::vector<int> p(n, -1);
+Graph ReadGraph() {
+  int n;
+  std::cin >> n;
+  Graph g(n);
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      int w;
+      std::cin >> w;
+      if (w != cJoke) {
+        g.AddEdge(i, j, w);
+      }
+    }
+  }
+  return g;
+}
+
+int main() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+
+  Graph g = ReadGraph();
+
+  int size = g.Size();
+  std::vector<int> dist(size, cInf);
+  std::vector<int> p(size, -1);
   dist[0] = 0;
   int x = -1;
 
   const std::vector<Edge>& edges = g.GetEdges();
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < size; ++i) {
     x = -1;
     for (const auto& edge : edges) {
       int u = edge.u;
@@ -51,20 +72,16 @@ void Solve(const Graph& g) {
     std::cout << "YES\n";
     std::vector<int> cycle;
     int y = x;
-
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < size; ++i) {
       y = p[y];
     }
-
     for (int cur = y;; cur = p[cur]) {
       cycle.push_back(cur);
       if (cur == y && cycle.size() > 1) {
         break;
       }
     }
-
     std::reverse(cycle.begin(), cycle.end());
-
     std::cout << cycle.size() << "\n";
     for (int i = 0; i < static_cast<int>(cycle.size()); ++i) {
       std::cout << cycle[i] + 1;
@@ -74,25 +91,4 @@ void Solve(const Graph& g) {
     }
     std::cout << "\n";
   }
-}
-
-int main() {
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  int n;
-  std::cin >> n;
-
-  Graph g(n);
-
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      int w;
-      std::cin >> w;
-      if (w != cJoke) {
-        g.AddEdge(i, j, w);
-      }
-    }
-  }
-
-  Solve(g);
 }
