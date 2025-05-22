@@ -114,37 +114,59 @@ class Graph {
   }
 };
 
-void Solve() {
-  int n;
-  int m;
-  std::cin >> n >> m;
-  Graph g(n);
-  for (int i = 0; i < m; ++i) {
-    int u;
-    int v;
-    int c;
-    std::cin >> u >> v >> c;
-    g.AddEdge(u, v, c, i + 1);
+class Shell {
+ public:
+  static void Start() {
+    Shell shell;
+    shell.Run();
   }
 
-  int source = 1;
-  int sink = n;
-  long long min_cut_capacity = g.MaxFlow(source, sink);
-  g.FindReachableFromSource(source);
-  std::vector<int> cut_edges = g.GetMinCutEdges();
+ private:
+  int n_;
+  int m_;
+  Graph g_{0};
+  long long min_cut_capacity_{0};
+  std::vector<int> cut_edges_;
 
-  std::cout << cut_edges.size() << " " << min_cut_capacity << "\n";
-  for (size_t i = 0; i < cut_edges.size(); ++i) {
-    if (i > 0) {
-      std::cout << " ";
+  void Run() {
+    ReadInput();
+    Execute();
+    PrintResult();
+  }
+  void ReadInput() {
+    std::cin >> n_ >> m_;
+    g_ = Graph(n_);
+    for (int i = 0; i < m_; ++i) {
+      int u;
+      int v;
+      int c;
+      std::cin >> u >> v >> c;
+      g_.AddEdge(u, v, c, i + 1);
     }
-    std::cout << cut_edges[i];
   }
-  std::cout << "\n";
-}
+
+  void Execute() {
+    int source = 1;
+    int sink = n_;
+    min_cut_capacity_ = g_.MaxFlow(source, sink);
+    g_.FindReachableFromSource(source);
+    cut_edges_ = g_.GetMinCutEdges();
+  }
+
+  void PrintResult() {
+    std::cout << cut_edges_.size() << " " << min_cut_capacity_ << "\n";
+    for (size_t i = 0; i < cut_edges_.size(); ++i) {
+      if (i > 0) {
+        std::cout << " ";
+      }
+      std::cout << cut_edges_[i];
+    }
+    std::cout << "\n";
+  }
+};
 
 int main() {
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  Solve();
+  Shell::Start();
 }
